@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agent Coverage Review</title>
+<meta name="description" content="Regulated workflow automation coverage and exception rate by task type: where an AI agent runs end to end today, where it should expand next under a safe exception limit, and how many manual review hours that removes. Synthetic data, candidate work sample.">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a class="brandmark" href="https://vishal-kumar-portfolio-six.vercel.app" target="_blank" rel="noopener"><span class="dot"></span>VISHAL KUMAR</a>
+    <a class="pill-link" href="https://github.com/vishalkumarhere/brainco-agent-coverage-demo" target="_blank" rel="noopener">View source on GitHub &#8599;</a>
+  </div>
+
+  <header>
+    <div class="eyebrow-row">
+      <span class="eyebrow">Applied AI, agent operations</span>
+      <span class="eyebrow warn">Synthetic data</span>
+    </div>
+    <h1 class="title">Where the agent should take over next, and where it should not</h1>
+    <p class="lede">One month of regulated workflow volume across banking, insurance, and government task types. Each task's agent emits a calibrated confidence score; items above the auto approve threshold run end to end, everything else escalates to a human reviewer. The page shows the coverage and exception rate that threshold buys per task, ranks shadow mode tasks by the manual review hours they could remove while staying under a safe exception limit, and sizes the expansion plan.</p>
+    <div class="banner" role="note"><span class="ic">NOTE</span><span>Illustrative data modeled on Brain Co.'s public product structure. Not a real customer's or the company's actual data. Built by Vishal Kumar as a candidate work sample, not an official Brain Co. artifact.</span></div>
+  </header>
+
+  <section>
+    <div class="controls" aria-label="Dashboard filters">
+      <div class="control">
+        <span class="label" id="lblSector">Sector</span>
+        <div class="pill-toggle" id="sectorToggle" role="group" aria-labelledby="lblSector"></div>
+      </div>
+      <div class="control">
+        <label class="label" for="thresh">Auto approve confidence threshold</label>
+        <div class="slider-row">
+          <input type="range" id="thresh" min="0.80" max="0.98" step="0.005" value="0.90">
+          <span class="kval" id="threshVal">0.900</span>
+        </div>
+        <div class="hint">Higher means fewer items run end to end, with fewer exceptions among those that do.</div>
+      </div>
+      <div class="control">
+        <label class="label" for="limit">Safe exception limit</label>
+        <div class="slider-row">
+          <input type="range" id="limit" min="0.5" max="4" step="0.1" value="2">
+          <span class="kval" id="limitVal">2.0%</span>
+        </div>
+        <div class="hint">Share of automated items QA catches as wrong. Tasks above it are flagged everywhere on the page.</div>
+      </div>
+    </div>
+  </section>
+
+  <section style="padding-top:0;">
+    <div class="stat-grid" id="kpis"></div>
+  </section>
+
+  <section style="padding-top:0;">
+    <div class="grid-2">
+      <div class="panel">
+        <div class="panel-head">
+          <div><div class="panel-title">How each task's volume is handled</div><div class="panel-sub" id="stackSub"></div></div>
+          <div class="pill-toggle" id="viewToggle" role="group" aria-label="View"></div>
+        </div>
+        <div class="chart-wrap" id="stackChart"></div>
+        <div class="legend"><span><i class="sw c1"></i>Agent, end to end, clean</span><span><i class="sw c2"></i>Agent, exception caught by QA</span><span><i class="sw cm"></i>Escalated to a human</span></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head">
+          <div><div class="panel-title">Coverage against exception rate</div><div class="panel-sub">Agent eligible tasks at the current threshold, bubble size is monthly volume. Safe zone is left of the limit.</div></div>
+        </div>
+        <div class="chart-wrap" id="scatter"></div>
+        <div class="legend"><span><i class="sw c1 dot"></i>Under limit</span><span><i class="sw c2 dot"></i>Over limit</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section style="padding-top:0;">
+    <div class="panel">
+      <div class="panel-head">
+        <div><div class="panel-title">Task types ranked by expansion opportunity</div><div class="panel-sub">Manual hours at stake are the reviewer hours the agent would remove at the current threshold. Click a header to sort.</div></div>
+      </div>
+      <div class="table-scroll">
+        <table id="rankTable">
+          <thead><tr>
+            <th class="num" data-col="rank">#<span class="arr"></span></th>
+            <th data-col="name">Task type<span class="arr"></span></th>
+            <th class="num" data-col="volume">Monthly items<span class="arr"></span></th>
+            <th class="num" data-col="coverage">Coverage at threshold<span class="arr"></span></th>
+            <th class="num" data-col="exc">Exception rate<span class="arr"></span></th>
+            <th class="num" data-col="stake">Manual hrs at stake<span class="arr"></span></th>
+            <th data-col="status">Status<span class="arr"></span></th>
+          </tr></thead>
+          <tbody id="rankBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section style="padding-top:0;">
+    <div class="grid-2b">
+      <div class="panel">
+        <div class="panel-head"><div class="panel-title">Findings</div></div>
+        <div class="findings" id="findings"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><div class="panel-title">Action plan, in priority order</div></div>
+        <ol class="actions" id="actions"></ol>
+      </div>
+    </div>
+  </section>
+
+  <section style="padding-top:0;">
+    <div class="panel">
+      <div class="panel-head">
+        <div><div class="panel-title">Decision impact: how far to expand agent coverage</div><div class="panel-sub">Shadow mode tasks move to live in ranked order. A verification guardrail lowers exception rates and can make more tasks eligible.</div></div>
+      </div>
+      <div class="impact-grid">
+        <div class="impact-controls">
+          <div>
+            <label class="label" for="nTasks">Task types moved to live</label>
+            <div class="slider-row"><input type="range" id="nTasks" min="0" max="3" step="1" value="2"><span class="kval" id="nTasksVal">2</span></div>
+            <div class="hint" id="nTasksList"></div>
+          </div>
+          <div>
+            <label class="label" for="guard">Guardrail exception reduction</label>
+            <div class="slider-row"><input type="range" id="guard" min="0" max="60" step="5" value="0"><span class="kval" id="guardVal">0%</span></div>
+            <div class="hint">A second pass verifier prompt, schema validation, and a citation check against source documents, applied to every agent output before it is committed.</div>
+          </div>
+          <div>
+            <label class="label" for="assist">Time saved in human assist mode</label>
+            <div class="slider-row"><input type="range" id="assist" min="0" max="60" step="5" value="35"><span class="kval" id="assistVal">35%</span></div>
+            <div class="hint">For tasks kept with a human by policy, the agent drafts the decision and the reviewer signs off.</div>
+          </div>
+          <div class="impact-out" id="impactOut"></div>
+        </div>
+        <div>
+          <div class="label" style="margin-bottom:8px;">Manual review hours removed per month by task types moved to live</div>
+          <div class="chart-wrap" id="curve"></div>
+          <p class="assume" id="assume"></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="foot">
+    Built by Vishal Kumar as a candidate work sample for the Machine Learning Engineer, Applied AI role, drawing on production LLM, RAG, and agent architecture work: prompt chains, confidence thresholds, and human in the loop routing. All volumes, confidence curves, exception rates, and handling times are synthetic, generated deterministically in <span class="mono">app.js</span> from per task parameters. Every number on the page is computed live from the same task table and the same coverage and exception curves.
+    <br>Source on <a href="https://github.com/vishalkumarhere/brainco-agent-coverage-demo" target="_blank" rel="noopener">GitHub</a>. Portfolio at <a href="https://vishal-kumar-portfolio-six.vercel.app" target="_blank" rel="noopener">vishal-kumar-portfolio-six.vercel.app</a>.
+  </footer>
+
+</div>
+<script src="charts.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
